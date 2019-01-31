@@ -1,0 +1,42 @@
+version: '3'
+services:
+    
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    expose:
+      - "5672"
+      - "15672"
+    
+  sender:
+    image: sender
+    build: 
+      context: ./sender
+      dockerfile: Dockerfile-dev
+    container_name: sender
+    volumes:
+     - ./tmp/npm:/root/.npm:z
+     - ./sender/src:/usr/src/app/src:z
+
+  receiver1:
+    image: receiver
+    build: 
+      context: ./receiver
+      dockerfile: Dockerfile-dev
+    container_name: receiver1
+    volumes:
+     - ./tmp/npm:/root/.npm:z
+     - ./receiver/src:/usr/src/app/src:z
+
+  receiver2:
+    image: receiver
+    build: 
+      context: ./receiver
+      dockerfile: Dockerfile-dev
+    container_name: receiver2
+    volumes:
+     - ./tmp/npm:/root/.npm:z
+     - ./receiver/src:/usr/src/app/src:z

@@ -1,0 +1,11 @@
+FROM node:8
+
+WORKDIR /usr/src/app
+COPY package*.json ./
+COPY nodemon.json ./
+
+EXPOSE 80
+
+CMD npm config set cache-min 9999999 \
+    && npm install \
+    && npm run start:dev
