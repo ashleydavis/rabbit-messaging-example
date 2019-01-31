@@ -1,1 +1,0 @@
-This directory contains a simple Node.js web server.

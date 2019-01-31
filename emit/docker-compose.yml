@@ -3,7 +3,7 @@ services:
     
   rabbit:
     image: rabbitmq:3-management
-    container_name: rabbit
+    container_name: rabbit-emit
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -12,31 +12,31 @@ services:
       - "15672"
     
   sender:
-    image: sender
+    image: sender-emit
     build: 
       context: ./sender
       dockerfile: Dockerfile-dev
-    container_name: sender
+    container_name: sender-emit
     volumes:
      - ./tmp/npm:/root/.npm:z
      - ./sender/src:/usr/src/app/src:z
 
   receiver1:
-    image: receiver
+    image: receiver-emit
     build: 
       context: ./receiver
       dockerfile: Dockerfile-dev
-    container_name: receiver1
+    container_name: receiver1-emit
     volumes:
      - ./tmp/npm:/root/.npm:z
      - ./receiver/src:/usr/src/app/src:z
 
   receiver2:
-    image: receiver
+    image: receiver-emit
     build: 
       context: ./receiver
       dockerfile: Dockerfile-dev
-    container_name: receiver2
+    container_name: receiver2-emit
     volumes:
      - ./tmp/npm:/root/.npm:z
      - ./receiver/src:/usr/src/app/src:z

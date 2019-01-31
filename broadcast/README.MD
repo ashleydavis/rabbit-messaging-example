@@ -1,0 +1,1 @@
+This directory contains an example microservices application where a sender service is broadcasting a message that is recieved by multiple receiver services.
