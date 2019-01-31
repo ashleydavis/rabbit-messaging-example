@@ -53,13 +53,13 @@ main()
 // Emit a message.
 //
 async function emitMessage(messagingChannel, exchangeName, messagePayload) {
-    console.log("Sending message to queue " + queueName);
+    console.log("Sending message to exchange " + exchangeName);
     console.log("Payload:");
     console.log(messagePayload);
 
     await new Promise((resolve, reject) => {
         console.log("Starting message exchange: " + exchangeName);
-        messagingChannel.assertExchange(exchangeName, 'topic', {}, err => {
+        messagingChannel.assertExchange(exchangeName, 'fanout', {}, err => {
             if (err) reject(err);
             resolve();
         });
