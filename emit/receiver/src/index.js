@@ -1,37 +1,16 @@
 'use strict';
 
-const amqp = require('amqplib/callback_api');
+const amqp = require('amqplib');
 const { retry } = require('./utils/retry');
 const { sleep } = require('./utils/sleep');
-
-//
-// Connect to RabbitMQ.
-//
-function connectMessaging(messagingHost) { //todo: Want to inline this function
-    return new Promise((resolve, reject) => {
-        amqp.connect(messagingHost, (err, connection) => {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(connection);
-            }
-        });
-    });
-}
 
 async function main() {
 
     console.log("Waiting for rabbit.");
     
-    await sleep(10000); //todo: Shouldn't need this.
-
     const queueName = "my-queue";
     const messagingHost = "amqp://guest:guest@rabbit:5672";
-    
-    //todo: const messagingConnection = await retry(() => amqp.connect(messagingHost), 10, 5000);
-    //const messagingConnection = await amqp.connect(messagingHost);
-    const messagingConnection = await connectMessaging(messagingHost);
+    const messagingConnection = await retry(() => amqp.connect(messagingHost), 10, 5000);
 
     console.log("Connected to rabbit.");
 

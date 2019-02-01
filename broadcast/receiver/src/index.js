@@ -1,43 +1,27 @@
 'use strict';
 
-const amqp = require('amqplib/callback_api');
+const amqp = require('amqplib');
 const { retry } = require('./utils/retry');
 const { sleep } = require('./utils/sleep');
-
-//
-// Connect to RabbitMQ.
-//
-function connectMessaging(messagingHost) { //todo: Want to inline this function
-    return new Promise((resolve, reject) => {
-        amqp.connect(messagingHost, (err, connection) => {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(connection);
-            }
-        });
-    });
-}
 
 async function main() {
 
     console.log("Waiting for rabbit.");
     
-    await sleep(12000); //todo: Shouldn't need this.
-
     const exchangeName = "my-exchange";
     const messagingHost = "amqp://guest:guest@rabbit:5672";
-    
-    //todo: const messagingConnection = await retry(() => amqp.connect(messagingHost), 10, 5000);
-    //const messagingConnection = await amqp.connect(messagingHost);
-    const messagingConnection = await connectMessaging(messagingHost);
+    const messagingConnection = await retry(() => amqp.connect(messagingHost), 10, 5000);
 
     console.log("Connected to rabbit.");
 
     const messagingChannel = await messagingConnection.createChannel();
 
-    await consumeMessages(messagingChannel, exchangeName,
+    await messagingChannel.assertExchange(exchangeName, "fanout");
+    const response = await messagingChannel.assertQueue("", {});
+    const queueName = response.queue;
+    await messagingChannel.bindQueue(queueName, exchangeName, "");
+
+    await consumeMessages(messagingChannel, exchangeName, queueName,
         messagePayload => {
             console.log("Payload: ");
             console.log(messagePayload);
@@ -56,23 +40,7 @@ main()
 //
 // Initialise a handler for messages.
 //
-async function consumeMessages(messagingChannel, exchangeName, handler) {
-    await new Promise((resolve, reject) => {
-        console.log("Starting message exchange: " + exchangeName);
-        messagingChannel.assertExchange(exchangeName, 'fanout', {}, err => {
-            if (err) reject(err);
-            resolve();
-        });
-    });
-
-    const queueName = await new Promise((resolve, reject) => {
-        // console.log("Starting message queue: " + queueName); //todo:
-        messagingChannel.assertQueue('', {}, (err, q) => {
-            if (err) reject(err);
-            messagingChannel.bindQueue(q.queue, exchangeName, '')
-            resolve(q.queue);
-        });
-    });
+async function consumeMessages(messagingChannel, exchangeName, queueName, handler) {
 
     await messagingChannel.consume(queueName, (msg) => {
 
@@ -99,6 +67,7 @@ async function consumeMessages(messagingChannel, exchangeName, handler) {
             console.error(queueName + " handler errored.");
             console.error(err && err.stack || err);
         }
-        console.log(`Receiving messages for exchange ${exchangeName} queue ${queueName}`);
+
+        console.log(`Receiving messages for exchange ${exchangeName} bound to queue ${queueName}`);
     });
 }
