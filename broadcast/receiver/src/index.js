@@ -4,38 +4,77 @@ const amqp = require('amqplib');
 const { retry } = require('./utils/retry');
 const { sleep } = require('./utils/sleep');
 
+//
+// Start the messaging connection and keep it alive.
+//
+async function startMessaging(messagingHost, onConnection) {
+
+    console.log("Starting messaging system.");
+
+    async function makeConnection() {
+        console.log("Waiting for Rabbit.");
+
+        const messagingConnection = await retry(() => amqp.connect(messagingHost, { reconnect: true }), 1000, 5000);
+
+        messagingConnection.isOpen = true;
+
+        console.log("Connected to Rabbit.");
+
+        messagingConnection.on('close', () => {
+            console.log("Rabbit connection closed! Will attempt reconnection.");
+
+            messagingConnection.isOpen = false;
+
+            makeConnection()
+                .then(() => console.log("Reconnected to rabbit."))
+                .catch(err => {
+                    console.error("Failed to reconnect to Rabbit.");
+                    console.error(err && err.stack || err);
+                });
+        });
+    
+        messagingConnection.on('error', () => {
+            console.log("Error from Rabbit:");
+            console.log(err && err.stack || err);
+        });
+
+        const promise = onConnection(messagingConnection);
+        if (promise) {
+            promise.then(() => console.log("Connection callback completed."))
+                .catch(err => {
+                    console.error("Error running client connection callback.");
+                    console.error(err && err.stack || err);
+                });
+        }
+        else {
+            console.log("Connection callback completed.");
+        }
+    }
+
+    await makeConnection();
+}
+
 async function main() {
 
     console.log("Waiting for rabbit.");
     
     const exchangeName = "my-exchange";
     const messagingHost = "amqp://guest:guest@rabbit:5672";
-    const messagingConnection = await retry(() => amqp.connect(messagingHost, { reconnect: true }), 10, 5000);
+    startMessaging(messagingHost, async messagingConnection => {
+        const messagingChannel = await messagingConnection.createChannel();
 
-    messagingConnection.on('close', () => {
-        console.log("Connection closed!");
+        await messagingChannel.assertExchange(exchangeName, "fanout");
+        const response = await messagingChannel.assertQueue("", {});
+        const queueName = response.queue;
+        await messagingChannel.bindQueue(queueName, exchangeName, "");
+
+        await consumeMessages(messagingChannel, exchangeName, queueName,
+            messagePayload => {
+                console.log("Payload: ");
+                console.log(messagePayload);
+            }
+        );
     });
-
-    messagingConnection.on('error', err => {
-        console.log("Connection error!");
-        console.log(err && err.stack || err);
-    });
-    
-    console.log("Connected to rabbit.");
-
-    const messagingChannel = await messagingConnection.createChannel();
-
-    await messagingChannel.assertExchange(exchangeName, "fanout");
-    const response = await messagingChannel.assertQueue("", {});
-    const queueName = response.queue;
-    await messagingChannel.bindQueue(queueName, exchangeName, "");
-
-    await consumeMessages(messagingChannel, exchangeName, queueName,
-        messagePayload => {
-            console.log("Payload: ");
-            console.log(messagePayload);
-        }
-    );
 }
 
 main()
