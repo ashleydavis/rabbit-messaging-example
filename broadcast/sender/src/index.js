@@ -10,8 +10,16 @@ async function main() {
 
     const exchangeName = "my-exchange";
     const messagingHost = "amqp://guest:guest@rabbit:5672";
-    const messagingConnection = await retry(() => amqp.connect(messagingHost), 10, 5000);
+    const messagingConnection = await retry(() => amqp.connect(messagingHost, { reconnect: true}), 10, 5000);
 
+    messagingConnection.on('close', () => {
+        console.log("Connection closed!");
+    });
+
+    messagingConnection.on('error', () => {
+        console.log("Connection error!");
+    });
+    
     console.log("Connected to rabbit.");
 
     const messagingChannel = await messagingConnection.createChannel();
