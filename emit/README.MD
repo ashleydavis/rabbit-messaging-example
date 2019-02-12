@@ -1,1 +1,1 @@
-This directory contains an example microservices application where a sender service is emitting a message that is recieved by only one of multiple receiever messages.
+This directory contains an example microservices application where a sender service is emitting a message that is received by only one of multiple receiever messages.

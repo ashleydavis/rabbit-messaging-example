@@ -1,0 +1,42 @@
+version: '3'
+services:
+    
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbit-broadcast
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    expose:
+      - "5672"
+      - "15672"
+    
+  sender:
+    image: sender-broadcast
+    build: 
+      context: ./sender
+      dockerfile: Dockerfile-dev
+    container_name: sender-broadcast
+    volumes:
+     - ./tmp/npm:/root/.npm:z
+     - ./sender/src:/usr/src/app/src:z
+
+  receiver1:
+    image: receiver-broadcast
+    build: 
+      context: ./receiver
+      dockerfile: Dockerfile-dev
+    container_name: receiver1-broadcast
+    volumes:
+     - ./tmp/npm:/root/.npm:z
+     - ./receiver/src:/usr/src/app/src:z
+
+  receiver2:
+    image: receiver-broadcast
+    build: 
+      context: ./receiver
+      dockerfile: Dockerfile-dev
+    container_name: receiver2-broadcast
+    volumes:
+     - ./tmp/npm:/root/.npm:z
+     - ./receiver/src:/usr/src/app/src:z

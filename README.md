@@ -4,6 +4,8 @@ Examples of using Rabbit for messaging between Node.js microservices:
 
 - emit/             -> Example of sending a message to be handled by a single microservice.
 - broadcast/        -> Example of broadcasting a message to multiple microservices.
+- topic/            -> Example of using a topic.
+- survival/         -> Example of senders and receivers that can survive a restart of the RabbitMQ server.
 
 ## Running the examples
 
