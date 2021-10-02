@@ -7,6 +7,8 @@ Examples of using Rabbit for messaging between Node.js microservices:
 - topic/            -> Example of using a topic.
 - survival/         -> Example of senders and receivers that can survive a restart of the RabbitMQ server.
 
+[Click here to support my work](https://www.codecapers.com.au/about#support-my-work)
+
 ## Running the examples
 
 Clone or download this repository.
