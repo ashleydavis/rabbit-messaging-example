@@ -4,15 +4,14 @@
   "main": "./src/index.js",
   "scripts": {
     "start": "node ./src/index.js",
-    "start:dev": "nodemon --legacy-watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "nodemon --legacy-watch"
   },
   "author": "ashley@codecapers.com.au",
   "license": "MIT",
   "dependencies": {
-    "amqplib": "^0.5.3"
+    "amqplib": "^0.10.4"
   },
   "devDependencies": {
-    "nodemon": "^1.18.7"
+    "nodemon": "^3.1.4"
   }
 }

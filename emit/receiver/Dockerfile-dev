@@ -1,4 +1,4 @@
-FROM node:8
+FROM node:20
 
 WORKDIR /usr/src/app
 COPY package*.json ./
@@ -6,6 +6,5 @@ COPY nodemon.json ./
 
 EXPOSE 80
 
-CMD npm config set cache-min 9999999 \
-    && npm install \
+CMD npm install --prefer-offline \
     && npm run start:dev
