@@ -1,5 +1,2 @@
-.vagrant/
-emit/receiver/node_modules/
-ubuntu-xenial-16.04-cloudimg-console.log
-emit/sender/node_modules/
+node_modules/
 tmp/
