@@ -98,7 +98,7 @@ async function consumeMessages(messagingChannel, exchangeName, queueName, handle
             const promise = handler(messagePayload);
             if (promise) {
                 promise.then(() => {
-                        messagingChannel.ack(msg); //TODO: Need to understand how ack works.
+                        messagingChannel.ack(msg);
                         console.log(queueName + " async handler done.");
                     })
                     .catch(err => {
